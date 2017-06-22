@@ -21,22 +21,24 @@ import javax.swing.JOptionPane;
 
 /**
  *
- * @author USUARIO
+ * @author lvazquez
  */
-public class ahorcado1 extends javax.swing.JFrame {
-    LecturaDatos le= new LecturaDatos();
+public class ahorcado1 extends javax.swing.JFrame {   //Se declaran las variables a utilizar para el juego 
+
+    LecturaDatos le = new LecturaDatos();
     Procedimiento pro = new Procedimiento();
-    public String capt[]=new String[20];
+    public String capt[] = new String[20];
     String concat;
-    int intentos;
+    int intentos = 1;
     //private String[] cap;
     //private int pasar;
     //private ImageIcon icono;
-    private int contador=0;
+    private int contador = 0;
     //String[] listaPalabras;
-      private StringBuilder palabra = new StringBuilder();
-    private Map<String, String>listarpalabras=new HashMap<>();
- 
+    private StringBuilder palabra = new StringBuilder();
+    private StringBuilder p1 = new StringBuilder();
+
+    private Map<String, String> listarpalabras = new HashMap<>();
 
     /**
      * Creates new form ahorcado
@@ -44,55 +46,114 @@ public class ahorcado1 extends javax.swing.JFrame {
     public ahorcado1() {
         initComponents();
         centrarForma();
-       
+        txtPalabra.setEditable(false);
+        txtDescripcion.setEditable(false);
+        txtAdivinar.setEditable(false);
+        txtPalabraerrada.setEditable(false);
+
     }
-    private void Iniciar(){
-        File archivo =new File("E:\\Ahorcado\\ahorcado.txt");
+
+    private void Iniciar() {   ///con este metodo se llama el archivo para que se lea en la caja de texto descripcion
+        File archivo = new File("C:\\Users\\vazquez\\Documents\\NetBeansProjects\\Ahorcado\\ahorcado.txt");
         leerArchivo(archivo);
         loadNextWord(contador);
+        txtAdivinar.setEditable(true);
         txtAdivinar.requestFocus();
-        contador=0;
+        btnIniciar.setEnabled(false);
+        lbl_cambioIntento.setText("Intentos: 1");
+        contador = 0;
     }
-    
-    private void centrarForma(){
-        Dimension pantalla=Toolkit.getDefaultToolkit().getScreenSize();
+
+    public void Gano() {  //// con este metodo se va a demostrar cuando se gana y adivinio la palabra correcta
+
+        String arregloPalabras[] = listarpalabras.get("" + contador).split(":");
+
+        if (contador == 4 && arregloPalabras[0].equals(txtPalabra.getText().replace(" ", "").toUpperCase())) {
+            JOptionPane.showMessageDialog(null, "Juego Terminado Ganaste");
+            JOptionPane.showMessageDialog(null, "El Juego se Reiniciará");
+
+            this.setVisible(false); // Borrará los datos y quitará la ventana del juego
+            ahorcado1.main(null);
+            return;
+
+        }
+
+        if (arregloPalabras[0].equals(txtPalabra.getText().replace(" ", "").toUpperCase())) {
+
+            JOptionPane.showMessageDialog(null, "Eso es todo campeón ya GANASTE!!!");
+            lbl_cambioIntento.setText("Intentos: 1");
+            pasarSiguientePalabra();
+
+        }
+    }
+
+    private void pasarSiguientePalabra() {
+        palabra = new StringBuilder();
+
+        lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado01.png")));
+        lbl_cambioIntento.setText("Intentos: 1");
+        intentos = 1;
+
+        contador++;
+
+        loadNextWord(contador);
+
+        lbl_cambioIntento.setText("Intentos: 1");
+    }
+
+    public void Perdio() {
+
+        if (intentos == 7) {
+
+            JOptionPane.showMessageDialog(null, "Ya perdiste MEN!!!");
+            txtPalabraerrada.setText("");
+            lbl_cambioIntento.setText("Intentos: 1");
+            pasarSiguientePalabra();
+            
+        }
+    }
+
+    private void centrarForma() {
+        Dimension pantalla = Toolkit.getDefaultToolkit().getScreenSize();
         Dimension ventana = this.getSize();
-        
-        double posX= (pantalla.getWidth() - ventana.getWidth())/2.0;
-        double posY= (pantalla.getHeight()- ventana.getHeight())/2.0;
-        
-        this.setLocation((int)posX,(int)posY );
-        
+
+        double posX = (pantalla.getWidth() - ventana.getWidth()) / 2.0;
+        double posY = (pantalla.getHeight() - ventana.getHeight()) / 2.0;
+
+        this.setLocation((int) posX, (int) posY);
+
     }
-    
-    
+
     private void leerArchivo(File archivo) {
-        int conta=0;
-        try{ 
-            BufferedReader input =new BufferedReader(new FileReader(archivo));
+        int conta = 0;
+        try {
+            BufferedReader input = new BufferedReader(new FileReader(archivo));
             try {
                 String line = null;
-                while ((line= input.readLine()) !=null) {
-                    listarpalabras.put("" + conta,line);
+                while ((line = input.readLine()) != null) {
+                    listarpalabras.put("" + conta, line);
                     conta++;
-                }        
-            }finally{
-                input.close();       
-            }      
-        }catch(IOException ex){
+                }
+            } finally {
+                input.close();
+            }
+        } catch (IOException ex) {
             ex.printStackTrace();
-        }  
-    }    
-    private void loadNextWord(int indice){
-        
-        
-        String line = listarpalabras.get("" + indice);   
+        }
+    }
+
+    private void loadNextWord(int indice) {
+
+        String line = listarpalabras.get("" + indice);
         StringBuilder wordConGuion = new StringBuilder();
-        
-        String [] datos = line.split(":");
-        
-        for (Character car : datos[0].toUpperCase().toLowerCase().toCharArray() ) 
-        {
+
+        String[] datos = line.split(":");
+        palabra = new StringBuilder();
+
+        for (Character car : datos[0].toUpperCase().toLowerCase().toCharArray()) {
+            p1.append(car);
+            p1.append(" ");
+
             palabra.append(car);
             palabra.append(" ");
             wordConGuion.append("_");
@@ -101,43 +162,60 @@ public class ahorcado1 extends javax.swing.JFrame {
         txtDescripcion.setText(datos[1]);
         txtPalabra.setText(wordConGuion.toString());
         txtAdivinar.setText("");
-    } 
-    
-    
-    public void cambiarImagen(){
-       switch(intentos){
-           case 2:
-               lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado02.png")));
-               
-               cambiointento.setText("Intento: 2");
-               break;
-           case 3:
-               lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado03.png")));
-               cambiointento.setText("Intento: 3");
-               break;
-           case 4:
-               lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado04.png")));
-               cambiointento.setText("Intento: 4");
-               break;
-          case 5:
-               lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado05.png")));
-               cambiointento.setText("Intento: 5");
-               break;
-          case 6:
-               lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado06.png")));
-               cambiointento.setText("Intento: 6");
-               break;
-          case 7:
-               lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado07.png")));
-               cambiointento.setText("Intento: 7");
-             
-               
-       }
     }
-    
-    
-    
-    
+
+    public void cambiarImagen() {
+        switch (intentos) {
+            case 2:
+                lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado02.png")));
+
+                lbl_cambioIntento.setText("Intentos: 2");
+
+                break;
+            case 3:
+                lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado03.png")));
+                lbl_cambioIntento.setText("Intentos: 3");
+
+                break;
+            case 4:
+                lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado04.png")));
+                lbl_cambioIntento.setText("Intentos: 4");
+
+                break;
+            case 5:
+                lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado05.png")));
+                lbl_cambioIntento.setText("Intentos: 5");
+                Gano();
+
+                break;
+            case 6:
+                lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado06.png")));
+                lbl_cambioIntento.setText("Intentos: 6");
+                Gano();
+
+                break;
+            case 7:
+
+                lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado07.png")));
+                lbl_cambioIntento.setText("Intentos: 7");
+
+                String arregloPalabras[] = listarpalabras.get("" + contador).split(":");
+
+                if (contador == 4) {
+                    JOptionPane.showMessageDialog(null, "Juego Terminado Moriste");
+                    JOptionPane.showMessageDialog(null, "El Juego se Reiniciará");
+
+                    this.setVisible(false); // Borrará los datos y quitará la ventana del juego
+                    ahorcado1.main(null);
+                    return;
+
+                }
+
+                Perdio();
+
+        }
+    }
+
 //int pasar=0;
 //ImageIcon icono=null;
     /**
@@ -165,9 +243,9 @@ public class ahorcado1 extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         lbimage = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
-        cambiointento = new javax.swing.JLabel();
+        lbl_cambioIntento = new javax.swing.JLabel();
         btnIniciar = new javax.swing.JButton();
-        txtReiniciar = new javax.swing.JButton();
+        btn_Reiniciar = new javax.swing.JButton();
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -239,12 +317,12 @@ public class ahorcado1 extends javax.swing.JFrame {
         txtDescripcion.setColumns(20);
         txtDescripcion.setRows(5);
         txtDescripcion.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
             public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
                 txtDescripcionAncestorAdded(evt);
             }
             public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
-            }
-            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
             }
         });
         jScrollPane1.setViewportView(txtDescripcion);
@@ -290,20 +368,19 @@ public class ahorcado1 extends javax.swing.JFrame {
         lbimage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ahorcado01.png"))); // NOI18N
         lbimage.setOpaque(true);
         lbimage.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
             public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
                 lbimageAncestorAdded(evt);
             }
             public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
             }
-            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
-            }
         });
 
         jPanel3.setBackground(new java.awt.Color(203, 109, 220));
 
-        cambiointento.setFont(new java.awt.Font("Kristen ITC", 0, 24)); // NOI18N
-        cambiointento.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        cambiointento.setText("Intentos");
+        lbl_cambioIntento.setFont(new java.awt.Font("Kristen ITC", 0, 24)); // NOI18N
+        lbl_cambioIntento.setText("Intentos");
 
         btnIniciar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/iniciar.png"))); // NOI18N
         btnIniciar.addActionListener(new java.awt.event.ActionListener() {
@@ -312,10 +389,10 @@ public class ahorcado1 extends javax.swing.JFrame {
             }
         });
 
-        txtReiniciar.setText("Reiniciar");
-        txtReiniciar.addActionListener(new java.awt.event.ActionListener() {
+        btn_Reiniciar.setText("Reiniciar Juego");
+        btn_Reiniciar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtReiniciarActionPerformed(evt);
+                btn_ReiniciarActionPerformed(evt);
             }
         });
 
@@ -326,12 +403,12 @@ public class ahorcado1 extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addComponent(btn_Reiniciar))
                     .addComponent(btnIniciar, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cambiointento, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lbl_cambioIntento, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(20, Short.MAX_VALUE))
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(txtReiniciar, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -339,9 +416,10 @@ public class ahorcado1 extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(btnIniciar, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(31, 31, 31)
-                .addComponent(cambiointento)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtReiniciar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(lbl_cambioIntento)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btn_Reiniciar)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -386,68 +464,59 @@ public class ahorcado1 extends javax.swing.JFrame {
 
     private void btnIniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarActionPerformed
         // TODO add your handling code here:
-       
-      
-      Iniciar();
-        
+
+        Iniciar();
+
     }//GEN-LAST:event_btnIniciarActionPerformed
 
     private void txtDescripcionAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_txtDescripcionAncestorAdded
         // TODO add your handling code here:
-        
-        
+
+
     }//GEN-LAST:event_txtDescripcionAncestorAdded
 
     private void txtAdivinarKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtAdivinarKeyTyped
         // TODO add your handling code here:
         char car = evt.getKeyChar();
-        if (!(Character.isAlphabetic(car))){
-           evt.consume();
-        }else{
-            int pos= palabra.indexOf(""+car);
+        if (!(Character.isAlphabetic(car))) {
+            evt.consume();
+        } else {
+            int pos = palabra.indexOf("" + car);
             StringBuilder adivina = new StringBuilder();
             if (pos >= 0) {
                 adivina.append(txtPalabra.getText());
                 while (pos >= 0) {
-                    
-                    palabra.replace(pos, pos +1,"-");
-                   adivina.replace(pos, pos + 1,""+car);
-                   pos = palabra.indexOf("" + car);
-                   
+
+                    palabra.replace(pos, pos + 1, "-");
+                    adivina.replace(pos, pos + 1, "" + car);
+                    pos = palabra.indexOf("" + car);
+
                 }
                 txtPalabra.setText(adivina.toString());
                 txtAdivinar.setText("");
-                
-            }else {
+
+                Gano();
+            } else {
                 evt.consume();
                 intentos++;
-              
-                txtPalabraerrada.setText(txtPalabraerrada.getText()+ car);
+
+                txtPalabraerrada.setText(txtPalabraerrada.getText() + car);
                 cambiarImagen();
             }
         }
-        
+
     }//GEN-LAST:event_txtAdivinarKeyTyped
 
     private void lbimageAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_lbimageAncestorAdded
         // TODO add your handling code here:
     }//GEN-LAST:event_lbimageAncestorAdded
 
-    private void txtReiniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtReiniciarActionPerformed
+    private void btn_ReiniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ReiniciarActionPerformed
         // TODO add your handling code here:
-         File archivo =new File("E:\\Ahorcado\\ahorcado.txt");
-        leerArchivo(archivo);
-        loadNextWord(contador);
-        txtAdivinar.requestFocus();
-        contador=0;
-        
-        contador = contador + 1 ;
-        txtPalabraerrada.setText("");
-        
-        loadNextWord(contador);
-        txtAdivinar.requestFocus();
-        intentos=1;
-    }//GEN-LAST:event_txtReiniciarActionPerformed
+        this.setVisible(false); // Borrará los datos y quitará la ventana del juego
+        ahorcado1.main(null);
+        return;
+    }//GEN-LAST:event_btn_ReiniciarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -486,7 +555,7 @@ public class ahorcado1 extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnIniciar;
-    private javax.swing.JLabel cambiointento;
+    private javax.swing.JButton btn_Reiniciar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -499,17 +568,17 @@ public class ahorcado1 extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lbimage;
+    private javax.swing.JLabel lbl_cambioIntento;
     private javax.swing.JTextField txtAdivinar;
     private javax.swing.JTextArea txtDescripcion;
     private javax.swing.JTextField txtPalabra;
     private javax.swing.JTextField txtPalabraerrada;
-    private javax.swing.JButton txtReiniciar;
     // End of variables declaration//GEN-END:variables
 
     //To change body of generated methods, choose Tools | Templates.
-    }
+}
 
-    /*
+/*
    
          
     }
@@ -517,14 +586,12 @@ public class ahorcado1 extends javax.swing.JFrame {
     
 
    
-    */
-
-   
-/*
+ */
+ /*
         public void limpiar(){
 txtAdivinar.setText
       
         
     }
 
-*/
+ */
