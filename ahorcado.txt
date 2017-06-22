@@ -1,2 +1,5 @@
 MURCIELAGO:Animal que tiene todas las vocales.
-ROLANDO:Jugador del año 2016
+ROLANDO:Jugador del año 2016.
+FRESA:Es una fruta de color rosa.
+PEÑA:Apellido del Presidente de México
+CHABELO:Amigo de todos los niños
